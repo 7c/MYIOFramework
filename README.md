@@ -20,7 +20,7 @@ const server_config = {
     // scheme: 'http',
     // ip:'127.0.0.1',
     // port: 3000,
-    namespace: '/pub',
+    namespace: '/sec',
     // output: true,
 
     // if auth is defined, then all the events will be authenticated expect the ones defined in public array
@@ -50,10 +50,14 @@ await server.stop()
 ```javascript
 
 const client_config = {
+    // specify server to connect to 
     // scheme: 'http',
     // ip:'127.0.0.1',
-    port: 3000,
-    namespace: '/pub',
+    // port: 3000,
+    // namespace: '/sec',
+    // or
+    
+    url:'http://127.0.0.1:3000/sec',
 }
 
 const client_opts = {
