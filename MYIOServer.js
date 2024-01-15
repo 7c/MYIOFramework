@@ -75,7 +75,7 @@ class MYIOServer {
         if (!that?.config?.auth) return next()
 
         const eventName = packet[0]
-        if (['whoami', '__connect'].includes(eventName)) return next()
+        // if (['whoami', '__connect'].includes(eventName)) return next()
 
         const arguments_passed = packet[1];
         const callbackfn = packet?.[2] && typeof packet?.[2] === 'function' ? packet[2] : () => { };
@@ -89,7 +89,7 @@ class MYIOServer {
         if (token && that.config?.auth?.bytoken?.hasOwnProperty(token)) {
             // now we have the token, lets check if this token has access to this evetName
             let { bytoken } = that.config.auth
-            if (bytoken[token]?.permissions?.includes(eventName) || bytoken[token]?.permissions?.includes('*')) {
+            if (bytoken[token]?.permissions?.includes(eventName) || bytoken[token]?.permissions?.includes('*') || eventName === 'whoami') {
                 that.#log(`access granted for ${token} towards ${chalk.bgYellow(eventName)}`)
                 socket.admin = bytoken[token]
                 return next()

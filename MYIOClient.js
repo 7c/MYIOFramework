@@ -3,7 +3,7 @@ const { promiseTimeout } = require('./shared')
 
 const defaultConfig = {
     port: 7555,
-    ip: '127.0.0.1',
+    hostname: '127.0.0.1',
     name: 'ioclient',
     namespace: "/",
     scheme: 'http',
@@ -57,7 +57,7 @@ class MYIOClient {
         this.opts = Object.assign({},defaultOptions, opts)
         
         // connect does not really connect unless you initiate a call
-        let connectionString = `${this.config.scheme}://${this.config.ip}:${this.config.port}${this.config.namespace}` 
+        let connectionString = `${this.config.scheme}://${this.config.hostname}:${this.config.port}${this.config.namespace}` 
         this.socket = io(connectionString, this.opts)
 
         this.socket.on('connect', () => {

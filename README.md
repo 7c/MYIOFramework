@@ -1,5 +1,9 @@
 ## myIOFramework
 consists of server and client which is wrapper around existing socket.io library. It is designed to be used in node.js and browser (future plan)..
+`
+npm i --save https://github.com/7c/MYIOFramework
+
+`
 
 ## MYIOServer
 ```javascript

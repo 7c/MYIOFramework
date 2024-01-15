@@ -26,7 +26,7 @@ class CustomMYIOServer extends MYIOServer {
 }
 
 describe('MYIOClient', () => {
-    test('whoami helper', async () => {
+    test('whoami function', async () => {
         let server1 = new CustomMYIOServer(SERVERCONFIG)
         await server1.launch()
         let client = new MYIOClient(SERVERCONFIG,{auth:{token:'admin1'}})
