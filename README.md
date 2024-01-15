@@ -6,7 +6,7 @@ consists of server and client which is wrapper around existing socket.io library
 const { MYIOServer } = require('MYIOFramework');
 
 class CustomIOSERVER extends MYIOServer {
-  
+
     async onConnect(socket) {
         console.log('onConnect')
     }

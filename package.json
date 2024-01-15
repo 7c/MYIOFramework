@@ -1,13 +1,23 @@
 {
   "name": "myioframework",
-  "version": "0.0.0",
-  "description": "Wrapper around socket.io to make it easier to use in a node.js server/cliet with authentication",
+  "version": "0.0.2",
+  "description": "Wrapper around socket.io to make it easier to use in a node.js server/client with/without authentication",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --forceExit --detectOpenHandles"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/7c/MYIOFramework"
+  },
+  "keywords": [
+    "socket.io",
+    "client",
+    "server",
+    "authentication"
+  ],
+  "author": "7c",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^4",
     "debug": "^4.3.4",

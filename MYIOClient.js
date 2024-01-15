@@ -1,9 +1,5 @@
 const { io } = require('socket.io-client')
-const chalk = require('chalk')
-const { promiseTimeout } = require('mybase')
-const debug = require('debug')('MYIOClient')
-
-const isRunningInJest = typeof jest !== 'undefined';
+const { promiseTimeout } = require('./shared')
 
 const defaultConfig = {
     port: 7555,
@@ -98,19 +94,14 @@ class MYIOClient {
         this.#log(`constructor passed ${connectionString}`)
     }
 
-    // launch() {
-    //     this.socket.emit('__connect',1) // this will initiate the connection
-    // }
-
     #log(scope, ...str) {
         if (this.config.output)
-            console.log(chalk.bgBlueBright(this.config.name), chalk.bgYellow(`socketio-client:${scope}`), ...str)
+            console.log(this.config.name, `socketio-client:${scope}`, ...str)
     }
 
     async connect(timeoutSeconds = 5) {
         let started = Date.now()
         while(true) {
-            // console.log(`>> ${timeoutSeconds}`,this.isConnected?'connected':'not connected')
             if (this.isConnected)
                 return true
             if (Date.now()-started > timeoutSeconds*1000) return false
