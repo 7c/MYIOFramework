@@ -1,6 +1,6 @@
 {
   "name": "myioframework",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Wrapper around socket.io to make it easier to use in a node.js server/client with/without authentication",
   "main": "index.js",
   "scripts": {

@@ -15,6 +15,7 @@ const defaultConfig = {
 }
 const defaultOptions = {
     reconnection: true, // enable reconnection
+    path: '/socket.io',
     // reconnectionAttempts: 3,
     forceNew: true,
     autoConnect: true,
@@ -26,7 +27,6 @@ const defaultOptions = {
 
 // make sure you use socket.io >=4.*
 class MYIOClient {
-    config = defaultConfig
     socket = false
     isConnected = false
 
@@ -52,11 +52,13 @@ class MYIOClient {
         return this.emitTimeout(timeoutSeconds, 'whoami')
     }
 
-    constructor(configuration, opts) {
-        this.config = Object.assign(defaultConfig, configuration)
+    constructor(configuration={}, opts={}) {
+        this.config = Object.assign({},defaultConfig, configuration)
+        this.opts = Object.assign({},defaultOptions, opts)
+        
         // connect does not really connect unless you initiate a call
         let connectionString = `${this.config.scheme}://${this.config.ip}:${this.config.port}${this.config.namespace}` 
-        this.socket = io(connectionString, Object.assign(defaultOptions, opts))
+        this.socket = io(connectionString, this.opts)
 
         this.socket.on('connect', () => {
             if (this.config.onConnect && typeof this.config.onConnect === 'function')
@@ -91,12 +93,12 @@ class MYIOClient {
             this.#log('reconnect_attempt')
         })
 
-        this.#log(`constructor passed ${connectionString}`)
+        this.#log(`constructor passed ${connectionString}`, this.opts)
     }
 
     #log(scope, ...str) {
         if (this.config.output)
-            console.log(this.config.name, `socketio-client:${scope}`, ...str)
+            console.log(`socketio-client:${scope}`,`/${this.config.name}${this.opts.path}`, ...str)
     }
 
     async connect(timeoutSeconds = 5) {

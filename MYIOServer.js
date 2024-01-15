@@ -1,8 +1,6 @@
 const app = require('express')()
-const ioclient = require('socket.io-client')
 const { validIp } = require('mybase')
 const chalk = require('chalk')
-const debug = require('debug')('MYIOServer')
 const socketio = require('socket.io')
 
 const isRunningInJest = typeof jest !== 'undefined';
@@ -16,22 +14,31 @@ const defaultConfig = {
     onClientConnect: false,
     namespace: "/",
     scheme: 'http',
+}
 
+const defaultOptions = {
+    // socket.io-server options to be passed to socket.io
+    // https://socket.io/docs/v4/server-options/
+    path: '/socket.io',
+    connectTimeout: 5000,
+    pingInterval: 10000,
+    pingTimeout: 10000,
     cors: {
         origin: '*',
         methods: ['GET', 'POST']
     }
-
 }
 
 // make sure you use socket.io >=4.*
 class MYIOServer {
     peers = {}
     admins = {}
+    config = {...defaultConfig}
+    opts = {...defaultOptions}
 
-    constructor(configuration) {
-        configuration = Object.assign(defaultConfig, configuration)
-        this.config = configuration
+    constructor(configuration,opts) {
+        this.config = Object.assign({},defaultConfig, configuration)
+        this.opts = Object.assign({},defaultOptions,opts)
 
         // validate configuration at constructor
         if (!this.config.hasOwnProperty('port')) throw new Error('port is not defined')
@@ -61,14 +68,6 @@ class MYIOServer {
         if (this.config.auth && this.config.auth.public && !Array.isArray(this.config.auth.public)) throw new Error('auth.public must be an array')
 
         this.#log(`constructor passed`)
-    }
-
-    getClient(opts = {}) {
-        let CONFIG = this.config
-        // connect does not really connect unless you initiate a call
-        let client = ioclient.connect(`${CONFIG.scheme}://${CONFIG.ip}:${CONFIG.port}${CONFIG.namespace}`, opts)
-        client.emit('__connect') // this will initiate the connection
-        return client
     }
 
     #middleware_isadmin(packet, socket, next, that) {
@@ -170,15 +169,11 @@ class MYIOServer {
                         reject(`port ${this.config.port} is already in use`)
                 })
                 this.http = http
-                const io = socketio(http, {
-                    cors: typeof this.config.cors === 'object' ? this.config.cors : false
-                }).of(this.config.namespace)
-                io.that = this
-                this.io = io
-
-                this.io.on('connection', (client) =>
+                const io = socketio(http, this.opts).of(this.config.namespace)
+                io.on('connection', (client) =>
                     this.onConnection(this, client)
                 )
+                
                 this.http.listen(this.config.port, this.config.ip, (a, b) => {
                     this.#log(chalk.bold(`socket.io-server (${chalk.yellow(this.config.name)}) listening on ${this.config.ip}:${this.config.port}`))
                     resolve(this)

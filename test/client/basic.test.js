@@ -16,7 +16,8 @@ describe('MYIOClient Basics', () => {
         let onConnect = jest.fn()
         let onDisconnect = jest.fn()
         let client = new MYIOClient({...SERVERCONFIG, onConnect, onDisconnect})
-        await wait(1/10)
+        await client.connect(2)
+        
         expect(onConnect).toHaveBeenCalled()
         client.disconnect()
         await wait(1/10)
@@ -29,7 +30,8 @@ describe('MYIOClient Basics', () => {
         await server1.launch()
         let onDisconnect = jest.fn()
         let client = new MYIOClient({...SERVERCONFIG, onDisconnect})
-        await wait(1/10)
+        await client.connect(2)
+        
         expect(onDisconnect).not.toHaveBeenCalled()
         client.disconnect()
         await wait(1/10)
@@ -45,7 +47,7 @@ describe('MYIOClient Basics', () => {
         await expect(client.connect(2)).resolves.toEqual(false)
     })
 
-    test.only('connect to open ports should not timeout at connect', async () => {
+    test('connect to open ports should not timeout at connect', async () => {
         let server1 = new MYIOServer(SERVERCONFIG)
         await server1.launch()
 
