@@ -1,6 +1,10 @@
-const { io } = require('socket.io-client')
+// @ts-nocheck
+import { io } from 'socket.io-client';
 
-
+/**
+ * @param {number | undefined} ms
+ * @param {Promise<any>} promise
+ */
 function promiseTimeout(ms, promise) {
     // Create a promise that rejects in <ms> milliseconds
     let timeout = new Promise((resolve, reject) => {
@@ -19,52 +23,48 @@ function promiseTimeout(ms, promise) {
 
 const defaultConfig = {
     name: 'ioclient',
-
-    // target
     scheme: 'http',
     hostname: '127.0.0.1',
     port: 7555,
     namespace: "/",
-    // target
-    // url: 'http://127.0.0.1:7555/',
-    
-    
     output: false,
-
     onConnect: false,
     onDisconnect: false,
     onError : false
 }
 
 const defaultOptions = {
-    reconnection: true, // enable reconnection
+    reconnection: true,
     path: '/socket.io',
-    // reconnectionAttempts: 3,
     forceNew: false,
     autoConnect: true,
-    // ackTimeout: 5000, // 5 seconds
-    timeout: 5000, // connection timeout 5 seconds
-    reconnectionDelayMax: 5000, // wait 5 seconds before reconnecting
-    reconnectionDelay: 2000, // wait 5 seconds between each attempt,
+    timeout: 5000,
+    reconnectionDelayMax: 5000,
+    reconnectionDelay: 2000,
 }
 
-// make sure you use socket.io >=4.*
 class MYIOClient {
-    socket = false
     isConnected = false
 
+    /**
+     * @param {number} timeoutSeconds
+     * @param {string[]} args
+     */
     emitTimeout(timeoutSeconds, ...args) {
         return promiseTimeout(timeoutSeconds * 1000, new Promise((resolve, reject) => {
-            this.socket.emit(...args, (err, ret) => {
+            this.socket.emit(...args, (/** @type {any} */ err, /** @type {any} */ ret) => {
                 if (err) return reject(err)
                 resolve(ret)
             })
         }))
     }
     
+    /**
+     * @param {string[]} args
+     */
     emit(...args) {
         return new Promise((resolve, reject) => {
-            this.socket.emit(...args, (err, ret) => {
+            this.socket.emit(...args, (/** @type {any} */ err, /** @type {any} */ ret) => {
                 if (err) return reject(err)
                 resolve(ret)
             })
@@ -120,6 +120,10 @@ class MYIOClient {
         this.#log(`constructor passed ${connectionString}`)
     }
 
+    /**
+     * @param {any} scope
+     * @param {any} str
+     */
     #log(scope, ...str) {
         if (this.config.output)
             console.log(`socketio-client:${scope}`,`/${this.config.name}${this.opts.path}`, ...str)
@@ -140,5 +144,5 @@ class MYIOClient {
     }
 }
 
-module.exports = { MYIOClient }
 
+export default MYIOClient;

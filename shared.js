@@ -1,4 +1,17 @@
 
+function validIp(str) {
+    if (str && typeof str==='string') {
+        let splitted
+        if (splitted=str.match(/^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/)) {
+            for(let octet of splitted) {
+                if (parseInt(octet)>=0 && parseInt(octet)<=255) continue
+                return false
+            }
+            return true
+        }
+    }
+    return false
+}
 
 function promiseTimeout(ms, promise) {
     // Create a promise that rejects in <ms> milliseconds
@@ -17,5 +30,6 @@ function promiseTimeout(ms, promise) {
 }
 
 module.exports = {
-    promiseTimeout
+    promiseTimeout,
+    validIp
 }

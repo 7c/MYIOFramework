@@ -1,7 +1,7 @@
 const app = require('express')()
-const { validIp } = require('mybase')
 const chalk = require('chalk')
 const socketio = require('socket.io')
+const { validIp } = require('./shared')
 
 const isRunningInJest = typeof jest !== 'undefined';
 
