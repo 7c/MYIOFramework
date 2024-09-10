@@ -1,6 +1,6 @@
 {
   "name": "@7c/myioframework",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Wrapper around socket.io to make it easier to use in a node.js server/client with/without authentication",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "chalk": "^4",
     "debug": "^4.3.4",
     "express": "^4.18.2",
+    "mybase": "^1.1.25",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4"
   },
