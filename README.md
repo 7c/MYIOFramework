@@ -1,21 +1,24 @@
-## myIOFramework
+## myIOFramework - Typescript generation
+- commonjs version is 0.* (previous commits)
+- typescript version is 1.* (not stable yet)
+
 consists of server and client which is wrapper around existing socket.io library. It is designed to be used in node.js and browser (future plan)..
 ```
 npm i --save https://github.com/7c/myioframework
 ```
 
 ## MYIOServer
-```javascript
-const { MYIOServer } = require('MYIOFramework');
+```typescript
+import { MYIOServer } from '@7c/myioframework';
+import { Socket } from 'socket.io';
 
 class CustomMYIOServer extends MYIOServer {
-    onConnection(that, client) {
+    async onConnection(that:MYIOServer, client:Socket) {
         super.onConnection(that, client)
-        client.on("publicecho",(str,cb) => cb(null,str))
-        client.on("privateecho",(str,cb) => cb(null,str))
+        client.on("privateecho", (str:string, cb:Function) =>  cb(null, str))
+        client.on("publicecho", (str:string, cb:Function) => cb(null, str))
     }
 }
-
 const server_config = {
     // scheme: 'http',
     // ip:'127.0.0.1',
@@ -65,7 +68,7 @@ const client_opts = {
     // path:'/socket.io', 
 }
 
-const { MYIOClient } = require('MYIOFramework')
+const { MYIOClient } = require('@7c/myioframework')
 let client1 = new MYIOClient(client_config,client_opts)
 await client1.connect(2)
 await client1.whoami(2)

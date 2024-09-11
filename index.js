@@ -1,8 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MYIOClient = exports.MYIOServer = void 0;
+const MYIOServer_js_1 = require("./MYIOServer.js");
+Object.defineProperty(exports, "MYIOServer", { enumerable: true, get: function () { return MYIOServer_js_1.MYIOServer; } });
 const { MYIOClient } = require('./MYIOClient.js');
-const { MYIOServer } = require('./MYIOServer.js');
-
-module.exports = {
-    // Models
-    MYIOClient,
-    MYIOServer,
-}
+exports.MYIOClient = MYIOClient;
+//# sourceMappingURL=index.js.map

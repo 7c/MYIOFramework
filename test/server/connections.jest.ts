@@ -1,14 +1,14 @@
-const { MYIOServer } = require("../../MYIOServer")
+import { MYIOServer } from "@root/MYIOServer"
 const TESTPORT = 7849
 
 describe('MYIOServer Connections', () => {
-    test('basic launch and stop', async () => {
+    it('basic launch and stop', async () => {
         const server = new MYIOServer({ port: TESTPORT })
         await server.launch()
         await server.stop()
     })
 
-    test("launching 2 seperate servers", async () => {
+    it("launching 2 seperate servers", async () => {
         const server1 = new MYIOServer({ port: TESTPORT })
         await server1.launch()
         await server1.stop()
@@ -18,7 +18,7 @@ describe('MYIOServer Connections', () => {
         await server2.stop()
     })
 
-    test("Launching 2 seperate servers on same port", async () => {
+    it("Launching 2 seperate servers on same port", async () => {
         const server1 = new MYIOServer({ port: TESTPORT })
         await server1.launch()
 

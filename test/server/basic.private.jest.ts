@@ -1,4 +1,5 @@
-const { MYIOServer } = require("../../MYIOServer")
+import { MYIOServer } from "@root/MYIOServer"
+import { Socket } from 'socket.io';
 const { MYIOClient } = require("../../MYIOClient")
 
 const CONFIG = {
@@ -18,9 +19,9 @@ const CONFIG = {
 }
 
 class CustomMYIOServer extends MYIOServer {
-    onConnection(that, client) {
+    async onConnection(that:MYIOServer, client:Socket) {
         super.onConnection(that, client)
-        client.on("privateecho", (str, cb) =>  cb(null, str))
+        client.on("privateecho", (str:string, cb:Function) =>  cb(null, str))
         client.on("publicecho", (str, cb) => cb(null, str))
     }
 }

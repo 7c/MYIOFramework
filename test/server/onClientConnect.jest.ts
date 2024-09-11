@@ -1,4 +1,4 @@
-const { MYIOServer } = require("../../MYIOServer")
+import { MYIOServer } from "@root/MYIOServer"
 const { MYIOClient } = require("../../MYIOClient")
 const TESTPORT = 7860
 

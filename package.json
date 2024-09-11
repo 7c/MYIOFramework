@@ -1,10 +1,10 @@
 {
   "name": "@7c/myioframework",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "Wrapper around socket.io to make it easier to use in a node.js server/client with/without authentication",
   "main": "index.js",
   "scripts": {
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "jest --forceExit"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,11 @@
     "socket.io-client": "^4.7.4"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "@jest/globals": "^29.7.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.5.4",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
   }
 }

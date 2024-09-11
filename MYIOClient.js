@@ -1,21 +1,9 @@
+const debug = require('debug');
 const { io } = require('socket.io-client')
+const dbg = debug('_MYIOClient');
+const { promiseTimeout } = require('mybase')
+// dbg.enabled = typeof jest !== 'undefined';
 
-
-function promiseTimeout(ms, promise) {
-    // Create a promise that rejects in <ms> milliseconds
-    let timeout = new Promise((resolve, reject) => {
-        let id = setTimeout(() => {
-            clearTimeout(id);
-            reject('TIMEDOUT')
-        }, ms)
-    })
-
-    // Returns a race between our timeout and the passed in promise
-    return Promise.race([
-        promise,
-        timeout
-    ])
-}
 
 const defaultConfig = {
     name: 'ioclient',
@@ -76,6 +64,7 @@ class MYIOClient {
     }
 
     constructor(configuration={}, opts={}) {
+        dbg('constructor', configuration, opts);
         this.config = Object.assign({},defaultConfig, configuration)
         this.opts = Object.assign({},defaultOptions, opts)
         
@@ -85,6 +74,7 @@ class MYIOClient {
         this.socket = io(connectionString, this.opts)
 
         this.socket.on('connect', () => {
+            dbg('event:connect')
             if (this.config.onConnect && typeof this.config.onConnect === 'function')
                 this.config.onConnect(this)
 
@@ -92,6 +82,7 @@ class MYIOClient {
             this.isConnected = true
         })
         this.socket.on('disconnect', () => {
+            dbg('event:disconnect')
             if (this.config.onDisconnect && typeof this.config.onDisconnect === 'function')
                 this.config.onDisconnect(this)
 
@@ -100,21 +91,28 @@ class MYIOClient {
 
         })
         this.socket.on('reconnect', () => {
+            dbg('event:reconnect')
             this.#log('reconnected')
             this.isConnected = true
         })
-        
+        this.socket.on('reconnect_error', (err) => {
+            dbg('event:reconnect_error', err)
+            this.#log('reconnect_error', err)
+        })
         this.socket.on('error', (err) => {
+            dbg('event:error', err)
             if (this.config.onError && typeof this.config.onError === 'function')
                 this.config.onError(err)
             this.#log('error', err)
         })
         this.socket.on('reconnect_failed', () => {
+            dbg('event:reconnect_failed')
             this.#log('reconnect_failed')
         })
 
-        this.socket.on('reconnect_attempt', () => {
-            this.#log('reconnect_attempt')
+        this.socket.on('reconnect_attempt', (attemptNumber) => {
+            dbg('event:reconnect_attempt', attemptNumber)
+            this.#log('reconnect_attempt', attemptNumber)
         })
 
         this.#log(`constructor passed ${connectionString}`)
@@ -126,19 +124,24 @@ class MYIOClient {
     }
 
     async connect(timeoutSeconds = 5) {
+        dbg('connect', timeoutSeconds)
         let started = Date.now()
         while(true) {
-            if (this.isConnected)
+            if (this.isConnected) {
+                dbg('connect', 'connected')
                 return true
+            }
+                
             if (Date.now()-started > timeoutSeconds*1000) return false
             await new Promise((resolve) => setTimeout(resolve, 100))
         }
     }
 
     disconnect() {
+        dbg('disconnect')
         this.socket.disconnect()
     }
 }
 
-module.exports = { MYIOClient }
 
+module.exports = { MYIOClient }

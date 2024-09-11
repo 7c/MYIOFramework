@@ -1,16 +1,17 @@
-const { MYIOServer } = require("../../MYIOServer")
+import { MYIOServer } from "@root/MYIOServer"
+import { Socket } from 'socket.io';
 const { MYIOClient } = require("../../MYIOClient")
 
 
 const CONFIG = {
-    port: 17850,
+    port: 17851,
     name: 'test',
     namespace: '/test',
     output: false,
 }
 
 class CustomMYIOServer extends MYIOServer {
-    onConnection(that, client) {
+    async onConnection(that:MYIOServer, client:Socket) {
         super.onConnection(that, client)
         client.on("echo",(str,cb) => cb(null,str))
     }
@@ -18,11 +19,11 @@ class CustomMYIOServer extends MYIOServer {
 
 
 describe('MYIOServer events on public server', () => {
-    test('echo', async () => {
+    it('echo should work', async () => {
         const server = new CustomMYIOServer(CONFIG)
         await server.launch()
         let client = new MYIOClient(CONFIG)
-        await client.connect(2)
+        await client.connect(200)
         await expect(client.emit('echo', 'test')).resolves.toEqual('test')
         client.disconnect()
         await server.stop()
