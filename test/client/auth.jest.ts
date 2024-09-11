@@ -1,5 +1,6 @@
-const { MYIOServer,emitSync } = require("../../MYIOServer")
-const { MYIOClient } = require("../../MYIOClient")
+import { MYIOServer } from "../../MYIOServer"
+import { MYIOClient } from "../../MYIOClient"
+import { Socket } from 'socket.io';
 
 const SERVERCONFIG = {
     port: 21852,
@@ -18,7 +19,7 @@ const SERVERCONFIG = {
 }
 
 class CustomMYIOServer extends MYIOServer {
-    onConnection(that, client) {
+    async onConnection(that:MYIOServer, client:Socket) {
         super.onConnection(that, client)
         client.on("privateecho", (str, cb) =>  cb(null, str))
         client.on("publicecho", (str, cb) => cb(null, str))

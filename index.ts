@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
-import { MYIOServer } from './MYIOServer.js';
+import { MYIOServer } from './MYIOServer';
+import { MYIOClient } from './MYIOClient';
 
-const { MYIOClient } = require('./MYIOClient.js');
 
 export { MYIOServer, MYIOClient }
 

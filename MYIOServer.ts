@@ -1,18 +1,22 @@
 import debug from 'debug';
 import express from 'express';
-const { MYIOClient } = require("./MYIOClient")
+import { MYIOClient } from "./MYIOClient"
 import chalk from 'chalk';
-import { Server,ServerOptions, Socket } from 'socket.io';
+import { Server, ServerOptions, Socket } from 'socket.io';
 import { validIp } from 'mybase/ts'
+import { IOClientOptions } from './MYIOClient';
 const dbg = debug('_MYIOServer');
 // dbg.enabled = typeof jest !== 'undefined';
 
-const app = express();
+
 
 
 export interface IOServerConfig {
+    // listen on port
     port: number;
+    // listen on ip
     ip: string;
+
     name: string;
     output: boolean;
     onClientDisconnect?: (client: Socket) => Promise<void>;
@@ -29,7 +33,7 @@ export interface IOServerConfig {
     };
 }
 
-interface IOServerOptions extends ServerOptions {
+export interface IOServerOptions extends ServerOptions {
     path: string;
     connectTimeout: number;
     pingInterval: number;
@@ -45,8 +49,6 @@ export const defaultIOServerConfig: IOServerConfig = {
     ip: '127.0.0.1',
     name: 'ioserver',
     output: false,
-    onClientDisconnect: undefined,
-    onClientConnect: undefined,
     namespace: "/",
     scheme: 'http',
 }
@@ -69,7 +71,7 @@ export class MYIOServer {
     private opts: Partial<IOServerOptions>;
     private http?: any;
 
-    constructor(configuration: Partial<IOServerConfig>={}, opts: Partial<IOServerOptions>={}) {
+    constructor(configuration: Partial<IOServerConfig> = {}, opts: Partial<IOServerOptions> = {}) {
         dbg('constructor', configuration, opts);
         this.config = { ...defaultIOServerConfig, ...configuration };
         this.opts = { ...defaultIOServerOptions, ...opts };
@@ -150,7 +152,7 @@ export class MYIOServer {
         client.ip = undefined;
 
         if (!client.ip && headers.hasOwnProperty('cf-connecting-ip') && validIp(headers['cf-connecting-ip'] as string))
-                client.ip = headers['cf-connecting-ip'] as string;
+            client.ip = headers['cf-connecting-ip'] as string;
 
         if (!client.ip)
             client.ip = headers.hasOwnProperty('x-tha-ip') && validIp(headers['x-tha-ip'] as string)
@@ -188,6 +190,7 @@ export class MYIOServer {
     async launch(): Promise<MYIOServer> {
         return new Promise(async (resolve, reject) => {
             try {
+                const app = express();
                 const http = require('http').Server(app);
                 http.on('error', (err: any) => {
                     dbg('error', err)
@@ -198,7 +201,7 @@ export class MYIOServer {
                 const io = new Server(http, this.opts).of(this.config.namespace);
 
                 io.on('connection', (client: Socket) => {
-                    dbg('connection', client.id)    
+                    dbg('connection', client.id)
                     this.log('connection', client.id)
                     this.onConnection(this, client)
                 });
@@ -246,8 +249,8 @@ export class MYIOServer {
         });
     }
 
-    IOClient():typeof MYIOClient {
-        return new MYIOClient(this.config, this.opts)
+    IOClient(): MYIOClient {
+        return new MYIOClient(this.config, this.opts as IOClientOptions)
     }
 }
 

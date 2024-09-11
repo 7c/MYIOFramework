@@ -1,5 +1,5 @@
 import { MYIOServer } from "../../MYIOServer"   
-const TESTPORT = 7849
+const TESTPORT = 8924
 
 describe('MYIOServer Connections', () => {
     it('basic launch and stop', async () => {
@@ -8,7 +8,7 @@ describe('MYIOServer Connections', () => {
         await server.stop()
     })
 
-    it("launching 2 seperate servers", async () => {
+    it("launching 2 seperate servers should be possible", async () => {
         const server1 = new MYIOServer({ port: TESTPORT })
         await server1.launch()
         await server1.stop()
@@ -18,7 +18,7 @@ describe('MYIOServer Connections', () => {
         await server2.stop()
     })
 
-    it("Launching 2 seperate servers on same port", async () => {
+    it("Launching 2 seperate servers on same port should fail", async () => {
         const server1 = new MYIOServer({ port: TESTPORT })
         await server1.launch()
 

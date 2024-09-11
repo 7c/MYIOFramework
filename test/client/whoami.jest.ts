@@ -1,5 +1,6 @@
-const { MYIOServer,emitSync } = require("../../MYIOServer")
-const { MYIOClient } = require("../../MYIOClient")
+import { MYIOServer } from "../../MYIOServer"
+import { MYIOClient } from "../../MYIOClient"
+import { Socket } from 'socket.io';
 
 const SERVERCONFIG = {
     port: 21652,
@@ -18,7 +19,7 @@ const SERVERCONFIG = {
 }
 
 class CustomMYIOServer extends MYIOServer {
-    onConnection(that, client) {
+    async onConnection(that:MYIOServer, client:Socket) {
         super.onConnection(that, client)
         client.on("privateecho", (str, cb) =>  cb(null, str))
         client.on("publicecho", (str, cb) => cb(null, str))
@@ -30,7 +31,7 @@ describe('MYIOClient', () => {
         let server1 = new CustomMYIOServer(SERVERCONFIG)
         await server1.launch()
         let client = new MYIOClient(SERVERCONFIG,{auth:{token:'admin1'}})
-        await client.connect(2)
+        expect(await client.connect(2)).toBeInstanceOf(MYIOClient)
         await expect(client.emit('privateecho',"test")).resolves.toEqual('test')
         let whoami = await client.whoami(2)
         expect(whoami).toHaveProperty('user.name','administrator 1')

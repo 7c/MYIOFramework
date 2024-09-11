@@ -6,20 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MYIOServer = exports.defaultIOServerOptions = exports.defaultIOServerConfig = void 0;
 const debug_1 = __importDefault(require("debug"));
 const express_1 = __importDefault(require("express"));
-const { MYIOClient } = require("./MYIOClient");
+const MYIOClient_1 = require("./MYIOClient");
 const chalk_1 = __importDefault(require("chalk"));
 const socket_io_1 = require("socket.io");
 const ts_1 = require("mybase/ts");
 const dbg = (0, debug_1.default)('_MYIOServer');
-// dbg.enabled = typeof jest !== 'undefined';
-const app = (0, express_1.default)();
 exports.defaultIOServerConfig = {
     port: 7555,
     ip: '127.0.0.1',
     name: 'ioserver',
     output: false,
-    onClientDisconnect: undefined,
-    onClientConnect: undefined,
     namespace: "/",
     scheme: 'http',
 };
@@ -159,6 +155,7 @@ class MYIOServer {
     async launch() {
         return new Promise(async (resolve, reject) => {
             try {
+                const app = (0, express_1.default)();
                 const http = require('http').Server(app);
                 http.on('error', (err) => {
                     dbg('error', err);
@@ -215,7 +212,7 @@ class MYIOServer {
         });
     }
     IOClient() {
-        return new MYIOClient(this.config, this.opts);
+        return new MYIOClient_1.MYIOClient(this.config, this.opts);
     }
 }
 exports.MYIOServer = MYIOServer;

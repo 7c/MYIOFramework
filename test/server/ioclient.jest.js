@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const MYIOServer_1 = require("../../MYIOServer");
+const MYIOClient_1 = require("../../MYIOClient");
 const TESTPORT = 7849;
 class CustomMYIOServer extends MYIOServer_1.MYIOServer {
     async onConnection(that, client) {
@@ -14,8 +15,8 @@ describe('MYIOServer IOClient', () => {
         await server.launch();
         const client = server.IOClient();
         expect(client).toBeDefined();
-        expect(await client.connect()).toBe(true);
-        await client.disconnect();
+        expect(await client.connect()).toBeInstanceOf(MYIOClient_1.MYIOClient);
+        client.disconnect();
         await server.stop();
     });
     it('should also work with different namespace', async () => {
@@ -23,8 +24,8 @@ describe('MYIOServer IOClient', () => {
         await server.launch();
         const client = server.IOClient();
         expect(client).toBeDefined();
-        expect(await client.connect()).toBe(true);
-        await client.disconnect();
+        expect(await client.connect()).toBeInstanceOf(MYIOClient_1.MYIOClient);
+        client.disconnect();
         await server.stop();
     });
     it('should be able to call the event', async () => {
@@ -32,9 +33,9 @@ describe('MYIOServer IOClient', () => {
         await server.launch();
         const client = server.IOClient();
         expect(client).toBeDefined();
-        expect(await client.connect()).toBe(true);
+        expect(await client.connect()).toBeInstanceOf(MYIOClient_1.MYIOClient);
         await expect(client.emit('echo', 'test')).resolves.toEqual('test');
-        await client.disconnect();
+        client.disconnect();
         await server.stop();
     });
 });

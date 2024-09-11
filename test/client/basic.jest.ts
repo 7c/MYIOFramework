@@ -1,6 +1,6 @@
-const { wait } = require('mybase')
-const { MYIOServer,emitSync } = require("../../MYIOServer")
-const { MYIOClient } = require("../../MYIOClient")
+import { MYIOServer } from "../../MYIOServer"
+import { MYIOClient } from "../../MYIOClient"
+import { wait } from "mybase/ts"
 
 const SERVERCONFIG = {
     port: 11850,
@@ -44,7 +44,7 @@ describe('MYIOClient Basics', () => {
 
     test('connect to non-open ports should timeout at connect', async () => {
         let client = new MYIOClient({...SERVERCONFIG})
-        await expect(client.connect(2)).resolves.toEqual(false)
+        expect(await client.connect(2)).toBe(false)
     })
 
     test('connect to open ports should not timeout at connect', async () => {
@@ -52,7 +52,7 @@ describe('MYIOClient Basics', () => {
         await server1.launch()
 
         let client = new MYIOClient({...SERVERCONFIG})
-        await expect(client.connect(10)).resolves.toEqual(true)
+        expect(await client.connect(10)).toBeInstanceOf(MYIOClient)
         client.disconnect()
         await server1.stop()
     })

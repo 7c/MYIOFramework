@@ -1,4 +1,5 @@
-import { MYIOServer } from "../../MYIOServer"
+import { MYIOServer } from "../../MYIOServer"   
+import { MYIOClient } from "../../MYIOClient"
 import { Socket } from 'socket.io';
 const TESTPORT = 7849
 
@@ -7,7 +8,7 @@ class CustomMYIOServer extends MYIOServer {
         super.onConnection(that, client)
         client.on("echo",(str,cb) => cb(null,str))
     }
-}   
+}
 
 describe('MYIOServer IOClient', () => {
     it('every server should be able to create client and connect to server', async () => {
@@ -15,8 +16,8 @@ describe('MYIOServer IOClient', () => {
         await server.launch()
         const client = server.IOClient()
         expect(client).toBeDefined()
-        expect(await client.connect()).toBe(true)
-        await client.disconnect()
+        expect(await client.connect()).toBeInstanceOf(MYIOClient)
+        client.disconnect()
         await server.stop() 
     })
 
@@ -25,8 +26,8 @@ describe('MYIOServer IOClient', () => {
         await server.launch()
         const client = server.IOClient()
         expect(client).toBeDefined()
-        expect(await client.connect()).toBe(true)
-        await client.disconnect()
+        expect(await client.connect()).toBeInstanceOf(MYIOClient)
+        client.disconnect()
         await server.stop() 
     })
 
@@ -35,11 +36,10 @@ describe('MYIOServer IOClient', () => {
         await server.launch()
         const client = server.IOClient()
         expect(client).toBeDefined()
-        expect(await client.connect()).toBe(true)
+        expect(await client.connect()).toBeInstanceOf(MYIOClient)
         await expect(client.emit('echo', 'test')).resolves.toEqual('test')
-        await client.disconnect()
+        client.disconnect()
         await server.stop() 
     })
-
 })
 
