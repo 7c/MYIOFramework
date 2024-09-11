@@ -5,6 +5,4 @@ const MYIOServer_js_1 = require("./MYIOServer.js");
 Object.defineProperty(exports, "MYIOServer", { enumerable: true, get: function () { return MYIOServer_js_1.MYIOServer; } });
 const { MYIOClient } = require('./MYIOClient.js');
 exports.MYIOClient = MYIOClient;
-// import global.d.ts
-require("./global.d.ts");
 //# sourceMappingURL=index.js.map
