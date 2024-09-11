@@ -31,6 +31,7 @@ exports.defaultIOServerOptions = {
 };
 class MYIOServer {
     constructor(configuration = {}, opts = {}) {
+        // so we can store the connected clients
         this.peers = {};
         this.admins = {};
         dbg('constructor', configuration, opts);
@@ -212,7 +213,13 @@ class MYIOServer {
         });
     }
     IOClient() {
-        return new MYIOClient_1.MYIOClient(this.config, this.opts);
+        const configuration = {
+            scheme: this.config.scheme,
+            hostname: this.config.ip,
+            port: this.config.port,
+            namespace: this.config.namespace,
+        };
+        return new MYIOClient_1.MYIOClient(configuration, this.opts);
     }
 }
 exports.MYIOServer = MYIOServer;

@@ -94,9 +94,11 @@ class MYIOClient {
     }
     async emit(...args) {
         return new Promise((resolve, reject) => {
+            dbg('emit', args);
             if (!this.socket)
                 return reject(new Error('Socket not connected')); // Add this check
             this.socket.emit(args[0], ...args.slice(1), (err, ret) => {
+                dbg('emit', err, ret);
                 if (err)
                     return reject(err);
                 resolve(ret);

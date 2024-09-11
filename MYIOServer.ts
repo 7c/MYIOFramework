@@ -4,7 +4,7 @@ import { MYIOClient } from "./MYIOClient"
 import chalk from 'chalk';
 import { Server, ServerOptions, Socket } from 'socket.io';
 import { validIp } from 'mybase/ts'
-import { IOClientOptions } from './MYIOClient';
+import { IOClientOptions, IOClientConfig } from './MYIOClient';
 const dbg = debug('_MYIOServer');
 // dbg.enabled = typeof jest !== 'undefined';
 
@@ -65,11 +65,13 @@ export const defaultIOServerOptions: Partial<IOServerOptions> = {
 }
 
 export class MYIOServer {
-    private peers: { [key: string]: any } = {};
-    private admins: { [key: string]: any } = {};
+    // so we can store the connected clients
+    protected peers: { [key: string]: any } = {}
+    protected admins: { [key: string]: any } = {}
+    protected http?: any;
+    
     public config: IOServerConfig;
-    private opts: Partial<IOServerOptions>;
-    private http?: any;
+    public opts: Partial<IOServerOptions>;
 
     constructor(configuration: Partial<IOServerConfig> = {}, opts: Partial<IOServerOptions> = {}) {
         dbg('constructor', configuration, opts);
@@ -250,7 +252,13 @@ export class MYIOServer {
     }
 
     IOClient(): MYIOClient {
-        return new MYIOClient(this.config, this.opts as IOClientOptions)
+        const configuration: Partial<IOClientConfig> ={
+            scheme: this.config.scheme,
+            hostname: this.config.ip,
+            port: this.config.port,
+            namespace: this.config.namespace,
+        }
+        return new MYIOClient(configuration, this.opts as IOClientOptions)
     }
 }
 

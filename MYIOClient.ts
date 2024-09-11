@@ -40,8 +40,8 @@ const defaultOptions: IOClientOptions = {
 export class MYIOClient {
     private socket?: Socket;
     private isConnected: boolean = false;
-    private config: IOClientConfig;
-    private opts: IOClientOptions;
+    public config: IOClientConfig;
+    public opts: IOClientOptions;
 
     constructor(configuration: Partial<IOClientConfig> = {}, opts: IOClientOptions = {}) {
         dbg('constructor', configuration, opts);
@@ -118,8 +118,10 @@ export class MYIOClient {
 
     async emit(...args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
+            dbg('emit', args);
             if (!this.socket) return reject(new Error('Socket not connected')); // Add this check
             this.socket.emit(args[0], ...args.slice(1), (err: Error, ret: any) => {
+                dbg('emit', err, ret);
                 if (err) return reject(err);
                 resolve(ret);
             });
