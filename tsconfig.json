@@ -19,12 +19,12 @@
     "strictPropertyInitialization": true, 
     "alwaysStrict": true, 
     "sourceMap": true,
-    "skipLibCheck": true,      
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@root/*": ["./*"],
-      "@models/*": ["./models/*"],
-      "@inc/*": ["./inc/ts/*"]
+      "@root/*": ["src/*"],
+      "@models/*": ["models/*"],
+      "@inc/*": ["inc/*"]
     }
   },
   "exclude": [

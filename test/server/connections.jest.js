@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const MYIOServer_1 = require("@root/MYIOServer");
+const MYIOServer_1 = require("../../MYIOServer");
 const TESTPORT = 7849;
 describe('MYIOServer Connections', () => {
     it('basic launch and stop', async () => {

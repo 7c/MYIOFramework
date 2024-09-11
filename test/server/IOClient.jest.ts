@@ -1,4 +1,4 @@
-import { MYIOServer } from "@root/MYIOServer"
+import { MYIOServer } from "../../MYIOServer"
 import { Socket } from 'socket.io';
 const TESTPORT = 7849
 

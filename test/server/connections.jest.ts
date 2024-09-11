@@ -1,4 +1,4 @@
-import { MYIOServer } from "@root/MYIOServer"
+import { MYIOServer } from "../../MYIOServer"   
 const TESTPORT = 7849
 
 describe('MYIOServer Connections', () => {

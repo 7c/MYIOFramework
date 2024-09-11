@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const MYIOServer_1 = require("@root/MYIOServer");
+const MYIOServer_1 = require("../../MYIOServer");
 const TESTPORT = 7849;
 class CustomMYIOServer extends MYIOServer_1.MYIOServer {
     async onConnection(that, client) {

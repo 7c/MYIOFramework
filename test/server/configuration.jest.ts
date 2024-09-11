@@ -1,4 +1,4 @@
-import { MYIOServer } from "@root/MYIOServer"
+import { MYIOServer } from "../../MYIOServer"
 
 describe('MYIOServer constructor', () => {
     test('uses default configuration when properties are missing', async () => {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const MYIOServer_1 = require("@root/MYIOServer");
+const MYIOServer_1 = require("../../MYIOServer");
 describe('MYIOServer constructor', () => {
     test('uses default configuration when properties are missing', async () => {
         const server = new MYIOServer_1.MYIOServer({});

@@ -1,4 +1,4 @@
-import { MYIOServer } from "@root/MYIOServer"
+import { MYIOServer } from "../../MYIOServer"
 import { wait } from 'mybase/ts'
 const { MYIOClient } = require("../../MYIOClient")
 
