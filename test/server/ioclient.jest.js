@@ -38,4 +38,4 @@ describe('MYIOServer IOClient', () => {
         await server.stop();
     });
 });
-//# sourceMappingURL=ioclient.jest.js.map
+//# sourceMappingURL=IOClient.jest.js.map
