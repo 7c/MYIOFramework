@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const MYIOServer_1 = require("../../MYIOServer");
-const { MYIOClient } = require("../../MYIOClient");
+const MYIOClient_1 = require("../../MYIOClient");
+const output = true;
 const CONFIG = {
     port: 27852,
     name: 'private',
     namespace: '/private',
-    output: false,
+    output,
     auth: {
         public: ['publicecho'],
         bytoken: {
@@ -28,7 +29,7 @@ describe('MYIOServer as private server', () => {
     test('privateecho should require authorization and denied to be called', async () => {
         const server = new CustomMYIOServer(CONFIG);
         await server.launch();
-        const client = new MYIOClient(CONFIG);
+        const client = new MYIOClient_1.MYIOClient(CONFIG);
         await client.connect(2);
         await expect(client.emitTimeout(1, 'privateecho', 'test')).rejects.toEqual({ error: "not authorized" });
         client.disconnect();
@@ -37,7 +38,7 @@ describe('MYIOServer as private server', () => {
     test('publicecho should still be public even though authorization is enabled', async () => {
         const server = new CustomMYIOServer(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 1 }));
         await server.launch();
-        const client = new MYIOClient(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 1 }));
+        const client = new MYIOClient_1.MYIOClient(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 1 }));
         await client.connect(2);
         await expect(client.emitTimeout(1, 'publicecho', 'test')).resolves.toEqual('test');
         client.disconnect();
@@ -46,7 +47,7 @@ describe('MYIOServer as private server', () => {
     test('privateecho should be able to called when authorized bytoken', async () => {
         const server = new CustomMYIOServer(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 4 }));
         await server.launch();
-        let client = new MYIOClient(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 4 }), { auth: { token: 'admin1' } });
+        let client = new MYIOClient_1.MYIOClient(Object.assign(Object.assign({}, CONFIG), { port: CONFIG.port + 4 }), { auth: { token: 'admin1' } });
         await client.connect(2);
         await expect(client.emitTimeout(1, 'privateecho', 'test')).resolves.toEqual('test');
         client.disconnect();

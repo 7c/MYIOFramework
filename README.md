@@ -2,12 +2,12 @@
 - commonjs version is 0.* (previous commits)
 - typescript version is 1.* (not stable yet)
 
-consists of server and client which is wrapper around existing socket.io library. It is designed to be used in node.js and browser (future plan)..
+consists of server and client which is wrapper around existing socket.io library. It is designed to be used in NodeJs and browser (future plan).. You can refer to [basic.ts example](./examples/basic.ts) to get started.
 ```
 npm i --save https://github.com/7c/myioframework
 ```
 
-## MYIOServer
+## MYIOServer Quick Start
 ```typescript
 import { MYIOServer } from '@7c/myioframework';
 import { Socket } from 'socket.io';
@@ -49,10 +49,12 @@ await server.launch()
 await server.stop()
 ```
 
-## MYIOClient
-```javascript
+## MYIOClient Quick Start
+```typescript
+import { MYIOClient,IOClientConfig, IOClientOptions } from '@7c/myioframework';
 
-const client_config = {
+
+let client_config : IOClientConfig = {
     // specify server to connect to 
     // scheme: 'http',
     // ip:'127.0.0.1',
@@ -63,12 +65,11 @@ const client_config = {
     url:'http://127.0.0.1:3000/sec',
 }
 
-const client_opts = {
-    auth: {token:'f831695e-1f42-4ba5-b86a-6c4284f2b34f'},
+let client_opts : IOClientOptions = {
+    auth: { token:'f831695e-1f42-4ba5-b86a-6c4284f2b34f' },
     // path:'/socket.io', 
 }
 
-const { MYIOClient } = require('@7c/myioframework')
 let client1 = new MYIOClient(client_config,client_opts)
 await client1.connect(2)
 await client1.whoami(2)

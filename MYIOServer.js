@@ -15,8 +15,9 @@ exports.defaultIOServerConfig = {
     port: 7555,
     ip: '127.0.0.1',
     name: 'ioserver',
-    output: false,
-    namespace: "/",
+    output: true,
+    outputTimestamp: true,
+    namespace: "/socket.io",
     scheme: 'http',
 };
 exports.defaultIOServerOptions = {
@@ -81,36 +82,48 @@ class MYIOServer {
         // auth.public must be an array
         if (this.config.auth && this.config.auth.public && !Array.isArray(this.config.auth.public))
             throw new Error('auth.public must be an array');
-        this.log(`constructor passed`);
+        this.log('constructor', `success`);
     }
     middlewareIsAdmin(packet, socket, next, that) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-        // if no auth is set, server is public accessible
-        if (!((_a = that === null || that === void 0 ? void 0 : that.config) === null || _a === void 0 ? void 0 : _a.auth))
-            return next();
         const eventName = packet[0];
         const argumentsPassed = packet[1];
         const callbackfn = (packet === null || packet === void 0 ? void 0 : packet[2]) && typeof (packet === null || packet === void 0 ? void 0 : packet[2]) === 'function' ? packet[2] : () => { };
-        // some events might be called without authorization if defined in auth.public array
-        if ((_d = (_c = (_b = that === null || that === void 0 ? void 0 : that.config) === null || _b === void 0 ? void 0 : _b.auth) === null || _c === void 0 ? void 0 : _c.public) === null || _d === void 0 ? void 0 : _d.includes(eventName))
+        dbg(`middlewareIsAdmin`, eventName);
+        // if no auth is set, server is public accessible
+        if (!((_a = that === null || that === void 0 ? void 0 : that.config) === null || _a === void 0 ? void 0 : _a.auth)) {
+            that.log(`request ${chalk_1.default.bgYellow(eventName)}: granted ${chalk_1.default.red('without auth')}`, argumentsPassed);
             return next();
-        let token = (_f = (_e = socket === null || socket === void 0 ? void 0 : socket.handshake) === null || _e === void 0 ? void 0 : _e.auth) === null || _f === void 0 ? void 0 : _f.token;
+        }
+        // some events might be called without authorization if defined in auth.public array
+        if ((_d = (_c = (_b = that === null || that === void 0 ? void 0 : that.config) === null || _b === void 0 ? void 0 : _b.auth) === null || _c === void 0 ? void 0 : _c.public) === null || _d === void 0 ? void 0 : _d.includes(eventName)) {
+            that.log(`request ${chalk_1.default.bgYellow(eventName)}: granted ${chalk_1.default.green('without auth')}`);
+            return next();
+        }
+        const token = (_f = (_e = socket === null || socket === void 0 ? void 0 : socket.handshake) === null || _e === void 0 ? void 0 : _e.auth) === null || _f === void 0 ? void 0 : _f.token;
+        // console.log(`handshake`, socket?.handshake)
+        // console.log(`packet`, packet)
+        // console.log(`argumentsPassed: '${argumentsPassed}' type: ${typeof argumentsPassed}`)
+        // console.log(`callbackfn: ${callbackfn} type: ${typeof callbackfn}`)
         // if we have config.auth defined we will check authorization
         if (token && ((_j = (_h = (_g = that.config) === null || _g === void 0 ? void 0 : _g.auth) === null || _h === void 0 ? void 0 : _h.bytoken) === null || _j === void 0 ? void 0 : _j.hasOwnProperty(token))) {
             // now we have the token, lets check if this token has access to this eventName
             let { bytoken } = that.config.auth;
             if (((_l = (_k = bytoken[token]) === null || _k === void 0 ? void 0 : _k.permissions) === null || _l === void 0 ? void 0 : _l.includes(eventName)) || ((_o = (_m = bytoken[token]) === null || _m === void 0 ? void 0 : _m.permissions) === null || _o === void 0 ? void 0 : _o.includes('*')) || eventName === 'whoami') {
-                that.log(`access granted for ${token} towards ${chalk_1.default.bgYellow(eventName)}`);
+                that.log(`request`, `${chalk_1.default.bgYellow(eventName)}: granted with token ${chalk_1.default.green(token)}`);
                 socket.admin = bytoken[token];
                 return next();
             }
         }
+        this.log(`request`, `${chalk_1.default.bgYellow(eventName)}: ${chalk_1.default.red('denied')} with token '${chalk_1.default.bold(token)}'`);
         callbackfn({ error: 'not authorized' });
         socket.disconnect();
     }
     log(scope, ...str) {
-        if (this.config.output)
-            console.log(chalk_1.default.bgGray(this.config.name), chalk_1.default.cyan(`socketio-server:${scope}`), ...str);
+        if (this.config.output) {
+            const timestamp = this.config.outputTimestamp ? chalk_1.default.gray(`[${new Date().toISOString()}]`) : '';
+            console.log(timestamp, chalk_1.default.bgGray(this.config.name), chalk_1.default.cyan(`socketio-server:${chalk_1.default.bold(scope)}:`), ...str);
+        }
     }
     async onConnection(that, client) {
         var _a, _b;
@@ -120,7 +133,7 @@ class MYIOServer {
         });
         const clientid = client.id;
         const { headers } = client.handshake;
-        // determine the IP
+        // determine the IP - needs improvement! we should not trust the headers
         client.ip = undefined;
         if (!client.ip && headers.hasOwnProperty('cf-connecting-ip') && (0, ts_1.validIp)(headers['cf-connecting-ip']))
             client.ip = headers['cf-connecting-ip'];
@@ -140,6 +153,7 @@ class MYIOServer {
             if (((_a = this.config) === null || _a === void 0 ? void 0 : _a.onClientDisconnect) && typeof this.config.onClientDisconnect === 'function')
                 await this.config.onClientDisconnect(client);
         });
+        // built in event whoami
         client.on('whoami', cb => {
             this.log(`whoami`, client.ip, clientid);
             if (client.admin) {
@@ -167,12 +181,12 @@ class MYIOServer {
                 const io = new socket_io_1.Server(http, this.opts).of(this.config.namespace);
                 io.on('connection', (client) => {
                     dbg('connection', client.id);
-                    this.log('connection', client.id);
+                    this.log('connection', `new connection: ${client.id}`);
                     this.onConnection(this, client);
                 });
                 this.http.listen(this.config.port, this.config.ip, () => {
                     dbg('listen', this.config.ip, this.config.port);
-                    this.log(chalk_1.default.bold(`socket.io-server (${chalk_1.default.yellow(this.config.name)}) listening on ${this.config.ip}:${this.config.port}`));
+                    this.log(`startup`, `listening on ${this.config.ip}:${this.config.port} namespace:${this.config.namespace}`);
                     resolve(this);
                 });
             }
@@ -195,7 +209,7 @@ class MYIOServer {
             }, timeoutSeconds * 1000);
             if (((_a = this === null || this === void 0 ? void 0 : this.http) === null || _a === void 0 ? void 0 : _a.close) && typeof this.http.close === 'function')
                 this.http.close(() => {
-                    this.log("stopped");
+                    this.log("stop", "stopped");
                     if (!sent) {
                         sent = true;
                         resolve(true);
@@ -203,7 +217,7 @@ class MYIOServer {
                     clearTimeout(to);
                 });
             else {
-                this.log("was already stopped");
+                this.log("stop", "was already stopped");
                 if (!sent) {
                     sent = true;
                     resolve(true);
@@ -212,14 +226,10 @@ class MYIOServer {
             }
         });
     }
-    IOClient() {
-        const configuration = {
-            scheme: this.config.scheme,
-            hostname: this.config.ip,
-            port: this.config.port,
-            namespace: this.config.namespace,
-        };
-        return new MYIOClient_1.MYIOClient(configuration, this.opts);
+    IOClient(configPartial = {}, clientOptions = {}) {
+        dbg(`IOClient acquired`);
+        const configuration = Object.assign({ scheme: this.config.scheme, hostname: this.config.ip, port: this.config.port, namespace: this.config.namespace, auth: undefined }, configPartial);
+        return new MYIOClient_1.MYIOClient(configuration, clientOptions);
     }
 }
 exports.MYIOServer = MYIOServer;

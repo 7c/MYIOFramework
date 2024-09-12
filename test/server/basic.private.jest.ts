@@ -1,12 +1,13 @@
 import { MYIOServer } from "../../MYIOServer"   
 import { Socket } from 'socket.io';
-const { MYIOClient } = require("../../MYIOClient")
+import { MYIOClient } from "../../MYIOClient"
+const output = true
 
 const CONFIG = {
     port: 27852,
     name: 'private',
     namespace: '/private',
-    output: false,
+    output,
     auth: {
         public: ['publicecho'],
         bytoken: {

@@ -1,13 +1,13 @@
 import { MYIOServer } from "../../MYIOServer"
 import { Socket } from 'socket.io';
 const { MYIOClient } = require("../../MYIOClient")
-
+const output = true
 
 const CONFIG = {
     port: 17851,
     name: 'test',
     namespace: '/test',
-    output: false,
+    output,
 }
 
 class CustomMYIOServer extends MYIOServer {

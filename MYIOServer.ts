@@ -19,14 +19,17 @@ export interface IOServerConfig {
 
     name: string;
     output: boolean;
+    outputTimestamp: boolean;
     onClientDisconnect?: (client: Socket) => Promise<void>;
     onClientConnect?: (client: Socket) => Promise<void>;
     namespace: string;
     scheme: 'http' | 'https';
     auth?: {
+        token?: string; // for client connection
         public?: string[];
         bytoken?: {
             [key: string]: {
+                name: string;
                 permissions: string[];
             };
         };
@@ -48,8 +51,9 @@ export const defaultIOServerConfig: IOServerConfig = {
     port: 7555,
     ip: '127.0.0.1',
     name: 'ioserver',
-    output: false,
-    namespace: "/",
+    output: true,
+    outputTimestamp: true,
+    namespace: "/socket.io",
     scheme: 'http',
 }
 
@@ -69,7 +73,7 @@ export class MYIOServer {
     protected peers: { [key: string]: any } = {}
     protected admins: { [key: string]: any } = {}
     protected http?: any;
-    
+
     public config: IOServerConfig;
     public opts: Partial<IOServerOptions>;
 
@@ -105,40 +109,57 @@ export class MYIOServer {
         // auth.public must be an array
         if (this.config.auth && this.config.auth.public && !Array.isArray(this.config.auth.public)) throw new Error('auth.public must be an array');
 
-        this.log(`constructor passed`);
+        this.log('constructor',`success`);
     }
 
     private middlewareIsAdmin(packet: any[], socket: Socket, next: (err?: any) => void, that: MYIOServer) {
-        // if no auth is set, server is public accessible
-        if (!that?.config?.auth) return next();
-
+        
         const eventName = packet[0];
         const argumentsPassed = packet[1];
         const callbackfn = packet?.[2] && typeof packet?.[2] === 'function' ? packet[2] : () => { };
+        
+        dbg(`middlewareIsAdmin`,eventName)
+        // if no auth is set, server is public accessible
+        if (!that?.config?.auth) {
+            that.log(`request ${chalk.bgYellow(eventName)}: granted ${chalk.red('without auth')}`,argumentsPassed);
+            return next();
+        }
+
+        
+        
 
         // some events might be called without authorization if defined in auth.public array
-        if (that?.config?.auth?.public?.includes(eventName)) return next();
+        if (that?.config?.auth?.public?.includes(eventName)) {
+            that.log(`request ${chalk.bgYellow(eventName)}: granted ${chalk.green('without auth')}`);
+            return next();
+        }
 
-        let token = socket?.handshake?.auth?.token;
-
+        const token = socket?.handshake?.auth?.token;
+        // console.log(`handshake`, socket?.handshake)
+        // console.log(`packet`, packet)
+        // console.log(`argumentsPassed: '${argumentsPassed}' type: ${typeof argumentsPassed}`)
+        // console.log(`callbackfn: ${callbackfn} type: ${typeof callbackfn}`)
         // if we have config.auth defined we will check authorization
         if (token && that.config?.auth?.bytoken?.hasOwnProperty(token)) {
             // now we have the token, lets check if this token has access to this eventName
             let { bytoken } = that.config.auth;
             if (bytoken[token]?.permissions?.includes(eventName) || bytoken[token]?.permissions?.includes('*') || eventName === 'whoami') {
-                that.log(`access granted for ${token} towards ${chalk.bgYellow(eventName)}`);
+                that.log(`request`,`${chalk.bgYellow(eventName)}: granted with token ${chalk.green(token)}`);
                 socket.admin = bytoken[token];
                 return next();
             }
         }
-
+        this.log(`request`,`${chalk.bgYellow(eventName)}: ${chalk.red('denied')} with token '${chalk.bold(token)}'`);
         callbackfn({ error: 'not authorized' });
         socket.disconnect();
     }
 
     private log(scope: string, ...str: any[]) {
-        if (this.config.output)
-            console.log(chalk.bgGray(this.config.name), chalk.cyan(`socketio-server:${scope}`), ...str);
+        if (this.config.output) {
+            const timestamp = this.config.outputTimestamp ? chalk.gray(`[${new Date().toISOString()}]`) : '';   
+            console.log(timestamp, chalk.bgGray(this.config.name), chalk.cyan(`socketio-server:${chalk.bold(scope)}:`), ...str);
+        }
+            
     }
 
     async onConnection(that: MYIOServer, client: Socket) {
@@ -150,7 +171,7 @@ export class MYIOServer {
         const clientid = client.id
         const { headers } = client.handshake;
 
-        // determine the IP
+        // determine the IP - needs improvement! we should not trust the headers
         client.ip = undefined;
 
         if (!client.ip && headers.hasOwnProperty('cf-connecting-ip') && validIp(headers['cf-connecting-ip'] as string))
@@ -175,6 +196,7 @@ export class MYIOServer {
                 await this.config.onClientDisconnect(client);
         });
 
+        // built in event whoami
         client.on('whoami', cb => {
             this.log(`whoami`, client.ip, clientid);
             if (client.admin) {
@@ -184,7 +206,7 @@ export class MYIOServer {
                     browser: client.browser,
                     clientid: clientid
                 });
-            }
+            } 
             cb('unauthenticated', null);
         });
     }
@@ -204,13 +226,13 @@ export class MYIOServer {
 
                 io.on('connection', (client: Socket) => {
                     dbg('connection', client.id)
-                    this.log('connection', client.id)
+                    this.log('connection', `new connection: ${client.id}`)
                     this.onConnection(this, client)
                 });
 
                 this.http.listen(this.config.port, this.config.ip, () => {
                     dbg('listen', this.config.ip, this.config.port)
-                    this.log(chalk.bold(`socket.io-server (${chalk.yellow(this.config.name)}) listening on ${this.config.ip}:${this.config.port}`));
+                    this.log(`startup`,`listening on ${this.config.ip}:${this.config.port} namespace:${this.config.namespace}`);
                     resolve(this);
                 });
             } catch (err) {
@@ -233,7 +255,7 @@ export class MYIOServer {
 
             if (this?.http?.close && typeof this.http.close === 'function')
                 this.http.close(() => {
-                    this.log("stopped");
+                    this.log("stop","stopped");
                     if (!sent) {
                         sent = true;
                         resolve(true);
@@ -241,7 +263,7 @@ export class MYIOServer {
                     clearTimeout(to);
                 });
             else {
-                this.log("was already stopped");
+                this.log("stop","was already stopped");
                 if (!sent) {
                     sent = true;
                     resolve(true);
@@ -251,14 +273,17 @@ export class MYIOServer {
         });
     }
 
-    IOClient(): MYIOClient {
+    IOClient(configPartial: Partial<IOClientConfig> = {}, clientOptions: IOClientOptions = {}): MYIOClient {
+        dbg(`IOClient acquired`)
         const configuration: Partial<IOClientConfig> ={
             scheme: this.config.scheme,
             hostname: this.config.ip,
             port: this.config.port,
             namespace: this.config.namespace,
+            auth: undefined,
+            ...configPartial,
         }
-        return new MYIOClient(configuration, this.opts as IOClientOptions)
+        return new MYIOClient(configuration, clientOptions)
     }
 }
 
